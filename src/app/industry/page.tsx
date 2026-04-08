@@ -5,7 +5,7 @@ import YearMonthPicker from '@/components/ui/year-month-picker';
 import { NEWS_COMPANIES, MARKET_COMPANIES } from '@/lib/constants';
 import { formatKRW } from '@/lib/format';
 
-type NewsItem = { title: string; description: string; link: string; source: string };
+type NewsItem = { title: string; description: string; link: string; source: string; summary: string };
 type TopModel = { rank: number; model: string; maker: string; sales: number };
 
 export default function IndustryPage() {
@@ -79,7 +79,7 @@ export default function IndustryPage() {
     const current = newsData[company] ?? [];
     setNewsData({
       ...newsData,
-      [company]: [...current, { headline: item.title, content: item.description, source: item.source }],
+      [company]: [...current, { headline: item.title, content: item.summary || item.description, source: item.source }],
     });
     // 추가한 항목은 검색 결과에서 제거
     setSearchResults((prev) => prev.filter((r) => r.title !== item.title));
