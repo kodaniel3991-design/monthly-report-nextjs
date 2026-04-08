@@ -19,6 +19,7 @@ export default function IndustryPage() {
   const [newsData, setNewsData] = useState<Record<string, { headline: string; content: string; source: string }[]>>({});
   const [searchResults, setSearchResults] = useState<NewsItem[]>([]);
   const [searching, setSearching] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // 판매 데이터
   const [topModels, setTopModels] = useState<TopModel[]>([]);
@@ -61,6 +62,7 @@ export default function IndustryPage() {
   const handleSearch = async (company: string) => {
     setSearching(true);
     setSearchResults([]);
+    setShowModal(true);
     try {
       const res = await fetch('/api/industry/naver', {
         method: 'POST',
@@ -79,6 +81,8 @@ export default function IndustryPage() {
       ...newsData,
       [company]: [...current, { headline: item.title, content: item.description, source: item.source }],
     });
+    // 추가한 항목은 검색 결과에서 제거
+    setSearchResults((prev) => prev.filter((r) => r.title !== item.title));
   };
 
   const removeNews = (company: string, idx: number) => {
@@ -174,35 +178,59 @@ export default function IndustryPage() {
         ))}
       </div>
 
-      {/* 뉴스 탭 */}
-      {activeTab < NEWS_COMPANIES.length && (
-        <div className="space-y-4">
-          {/* 검색 */}
-          <div className="bg-white rounded-xl border border-stone-200 p-4">
-            <div className="flex gap-2">
-              <button onClick={() => handleSearch(NEWS_COMPANIES[activeTab])} disabled={searching}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50">
-                {searching ? '검색 중...' : `${NEWS_COMPANIES[activeTab]} 뉴스 검색`}
-              </button>
+      {/* 검색 결과 모달 */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200">
+              <h3 className="font-semibold text-stone-800">
+                {NEWS_COMPANIES[activeTab]} 뉴스 검색 결과
+              </h3>
+              <button onClick={() => setShowModal(false)}
+                className="text-stone-400 hover:text-stone-600 text-xl leading-none">&times;</button>
             </div>
-
-            {searchResults.length > 0 && (
-              <div className="mt-3 space-y-2">
+            <div className="flex-1 overflow-y-auto p-4">
+              {searching && <p className="text-center text-stone-400 py-8">검색 중...</p>}
+              {!searching && searchResults.length === 0 && (
+                <p className="text-center text-stone-400 py-8">검색 결과가 없습니다</p>
+              )}
+              <div className="space-y-2">
                 {searchResults.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-stone-50">
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-stone-800 truncate">{item.title}</p>
-                      <p className="text-xs text-stone-500 mt-0.5 line-clamp-2">{item.description}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">{item.source}</p>
+                      <p className="text-sm font-medium text-stone-800">{item.title}</p>
+                      <p className="text-xs text-stone-500 mt-1 line-clamp-2">{item.description}</p>
+                      <p className="text-xs text-stone-400 mt-1">{item.source}</p>
                     </div>
                     <button onClick={() => addNews(NEWS_COMPANIES[activeTab], item)}
-                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 shrink-0">
+                      className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-500 shrink-0">
                       추가
                     </button>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
+            <div className="px-6 py-3 border-t border-stone-200 text-right">
+              <button onClick={() => setShowModal(false)}
+                className="px-4 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-700">
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 뉴스 탭 */}
+      {activeTab < NEWS_COMPANIES.length && (
+        <div className="space-y-4">
+          {/* 검색 버튼 */}
+          <div className="bg-white rounded-xl border border-stone-200 p-4">
+            <button onClick={() => handleSearch(NEWS_COMPANIES[activeTab])} disabled={searching}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50">
+              {searching ? '검색 중...' : `${NEWS_COMPANIES[activeTab]} 뉴스 검색`}
+            </button>
           </div>
 
           {/* 선택된 뉴스 */}
