@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       return new NextResponse(buffer as unknown as BodyInit, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename="노동생산성_${year}_${String(month).padStart(2, '0')}.xlsx"`,
+          'Content-Disposition': `attachment; filename="labor_productivity_${year}_${String(month).padStart(2, '0')}.xlsx"`,
         },
       });
     }
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       return new NextResponse(buffer as unknown as BodyInit, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename="업계동향_${year}_${String(month).padStart(2, '0')}.xlsx"`,
+          'Content-Disposition': `attachment; filename="industry_news_${year}_${String(month).padStart(2, '0')}.xlsx"`,
         },
       });
     }
